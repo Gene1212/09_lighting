@@ -25,10 +25,11 @@ color get_lighting(double *normal, double *view, color alight, double light[2][3
 {
   color i;
 
-  i.red = calculate_ambient(alight, areflect).red + calculate_diffuse(light, dreflect, normal).red;
-  i.green = calculate_ambient(alight, areflect).green + calculate_diffuse(light, dreflect, normal).green;
-  i.blue = calculate_ambient(alight, areflect).blue + calculate_diffuse(light, dreflect, normal).blue;
+  i.red = calculate_ambient(alight, areflect).red + calculate_diffuse(light, dreflect, normal).red + calculate_specular(light, sreflect, view, normal).red;
+  i.green = calculate_ambient(alight, areflect).green + calculate_diffuse(light, dreflect, normal).green + calculate_specular(light, sreflect, view, normal).green;
+  i.blue = calculate_ambient(alight, areflect).blue + calculate_diffuse(light, dreflect, normal).blue + calculate_specular(light, sreflect, view, normal).blue;
 
+  limit_color(&i);
   return i;
 }
 
@@ -47,13 +48,13 @@ color calculate_ambient(color alight, double *areflect)
 color calculate_diffuse(double light[2][3], double *dreflect, double *normal)
 {
   color d;
-  double newlight[1][3];
+  double newlight[3];
 
   normalize(normal);
 
-  newlight[0][0] = light[0][0];
-  newlight[0][1] = light[0][1];
-  newlight[0][2] = light[0][2];
+  newlight[0] = light[0][0];
+  newlight[1] = light[0][1];
+  newlight[2] = light[0][2];
   normalize(&newlight);
 
   double cos = dot_product(normal, &newlight);
@@ -68,8 +69,28 @@ color calculate_diffuse(double light[2][3], double *dreflect, double *normal)
 
 color calculate_specular(double light[2][3], double *sreflect, double *view, double *normal)
 {
-
   color s;
+  double *t = (double *)malloc(3 * sizeof(double));
+  double newlight[3];
+
+  newlight[0] = light[0][0];
+  newlight[1] = light[0][1];
+  newlight[2] = light[0][2];
+
+  normalize(normal);
+  normalize(&newlight);
+
+  t[0] = (2 * normal[0] * dot_product(&newlight, normal)) - newlight[0];
+  t[1] = (2 * normal[1] * dot_product(&newlight, normal)) - newlight[1];
+  t[2] = (2 * normal[2] * dot_product(&newlight, normal)) - newlight[2];
+
+  double cos = dot_product(t, view);
+
+  s.red = (short)(light[COLOR][RED] * sreflect[RED] * pow(cos, SPECULAR_EXP));
+  s.green = (short)(light[COLOR][GREEN] * sreflect[GREEN] * pow(cos, SPECULAR_EXP));
+  s.blue = (short)(light[COLOR][BLUE] * sreflect[BLUE] * pow(cos, SPECULAR_EXP));
+
+  limit_color(&s);
   return s;
 }
 
