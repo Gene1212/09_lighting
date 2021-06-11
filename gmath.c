@@ -55,9 +55,9 @@ color calculate_diffuse(double light[2][3], double *dreflect, double *normal)
   newlight[0] = light[0][0];
   newlight[1] = light[0][1];
   newlight[2] = light[0][2];
-  normalize(&newlight);
+  normalize(newlight);
 
-  double cos = dot_product(normal, &newlight);
+  double cos = dot_product(normal, newlight);
 
   d.red = (short)(light[COLOR][RED] * dreflect[RED] * cos);
   d.green = (short)(light[COLOR][GREEN] * dreflect[GREEN] * cos);
@@ -78,11 +78,11 @@ color calculate_specular(double light[2][3], double *sreflect, double *view, dou
   newlight[2] = light[0][2];
 
   normalize(normal);
-  normalize(&newlight);
+  normalize(newlight);
 
-  t[0] = (2 * normal[0] * dot_product(&newlight, normal)) - newlight[0];
-  t[1] = (2 * normal[1] * dot_product(&newlight, normal)) - newlight[1];
-  t[2] = (2 * normal[2] * dot_product(&newlight, normal)) - newlight[2];
+  t[0] = (2 * normal[0] * dot_product(newlight, normal)) - newlight[0];
+  t[1] = (2 * normal[1] * dot_product(newlight, normal)) - newlight[1];
+  t[2] = (2 * normal[2] * dot_product(newlight, normal)) - newlight[2];
 
   double cos = dot_product(t, view);
 
@@ -99,15 +99,15 @@ void limit_color(color *c)
 {
   if (c->red > 255)
   {
-    c->red = 255;
+    c->red = c->red % 255;
   }
   if (c->green > 255)
   {
-    c->green = 255;
+    c->green = c->green % 255;
   }
   if (c->blue > 255)
   {
-    c->blue = 255;
+    c->blue = c->blue % 255;
   }
 }
 
